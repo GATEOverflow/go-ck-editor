@@ -42,6 +42,8 @@ CKEDITOR.editorConfig = function( config ) {
 	config.extraAllowedContent = 'pre[*]{*}(*),iframe[*]'; // add other rules here
 	//      config.allowedContent = 'pre[*]{*}(*)'; // add other rules here
 
+	config.filebrowserUploadMethod = 'form';
+
 
 	// Simplify the dialog windows.
 	config.removeDialogTabs = 'image:advanced;link:advanced';
