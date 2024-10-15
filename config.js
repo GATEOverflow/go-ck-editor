@@ -35,15 +35,19 @@ CKEDITOR.editorConfig = function( config ) {
 	// Set the most common block elements.
 	config.format_tags = 'p;h1;h2;h3;pre';
 
+	config.versionCheck = false;
 	//config.extraPlugins ='iframe,notification';
-	config.removePlugins ='sourcedialog';
+	config.removePlugins ='sourcedialog,eqneditor';
 	config.extraPlugins ='emoji';
 	config.scayt_autoStartup = true;
-	config.extraAllowedContent = 'pre[*]{*}(*),iframe[*]'; // add other rules here
+	config.allowedContent = true;
+	config.extraAllowedContent = 'pre[*]{*}(*);iframe[*];*(*)'; // add other rules here
 	//      config.allowedContent = 'pre[*]{*}(*)'; // add other rules here
 
 	config.filebrowserUploadMethod = 'form';
-
+	config.autosave = {
+		messageType: "no"
+	};
 
 	// Simplify the dialog windows.
 	config.removeDialogTabs = 'image:advanced;link:advanced';
