@@ -12,12 +12,16 @@ body
 
 	/* Text color */
 	color: #333;
-
-	/* Remove the background color to make it transparent. */
-	background-color: #fff;
-
 	margin: 20px;
 }
+
+html:not([data-theme="light"]) body {
+	color: #f1f1f1;
+}
+html.cke_panel_container body {
+	color: inherit;
+}
+
 
 .cke_editable
 {
