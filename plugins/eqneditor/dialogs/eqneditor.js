@@ -54,7 +54,7 @@ CKEDITOR.dialog.add("eqneditorDialog", function(editor) {
             elements: [
                 {
                     type: 'html',
-                    html: '<div style="margin-bottom:6px;"><label style="font-weight:bold;">Type: </label><select id="' + typeId + '" style="padding:3px 8px;"><option value="inline">Inline ($...$)</option><option value="display">Display ($$...$$)</option></select></div>'
+                    html: '<div style="margin-bottom:6px;"><label style="font-weight:bold;">Type: </label><select id="' + typeId + '" class="cke_eqn_select" style="padding:4px 8px;border-radius:4px;border:1px solid #aaa;">  <option value="inline">Inline ($...$)</option><option value="display">Display ($$...$$)</option></select></div>'
                 },
                 {
                     type: 'html',
@@ -62,7 +62,7 @@ CKEDITOR.dialog.add("eqneditorDialog", function(editor) {
                 },
                 {
                     type: 'html',
-                    html: '<textarea id="' + latexId + '" rows="5" style="border:1px solid #8fb6bd; width:540px; font-size:16px; padding:5px; background-color:#ffc; font-family:monospace;"></textarea>'
+                    html: '<textarea id="' + latexId + '" rows="5" class="cke_eqn_textarea" style="border:1px solid #8fb6bd; width:540px; font-size:16px; padding:8px; border-radius:4px; font-family:\'JetBrains Mono\',\'Fira Code\',monospace; background-color:#fafafa;"></textarea>'
                 },
                 {
                     type: 'html',
@@ -70,11 +70,11 @@ CKEDITOR.dialog.add("eqneditorDialog", function(editor) {
                 },
                 {
                     type: 'html',
-                    html: '<div id="' + previewId + '" style="min-height:50px; padding:12px; border:1px solid #ccc; background:#fafafa; font-size:18px; text-align:center; overflow:auto;"></div>'
+                    html: '<div id="' + previewId + '" class="cke_eqn_preview" style="min-height:50px; padding:12px; border:1px solid #ccc; border-radius:4px; background:#fafafa; font-size:18px; text-align:center; overflow:auto;"></div>'
                 },
                 {
                     type: 'html',
-                    html: '<div style="margin-top:8px; font-size:11px; color:#666;">Common: \\frac{a}{b} &nbsp; \\sqrt{x} &nbsp; x^{2} &nbsp; \\sum_{i=1}^{n} &nbsp; \\int_{a}^{b} &nbsp; \\alpha \\beta \\gamma &nbsp; \\leq \\geq \\neq &nbsp; \\times \\div &nbsp; \\infty</div>'
+                    html: '<div class="cke_eqn_help" style="margin-top:8px; font-size:11px; color:#666;">Common: \\frac{a}{b} &nbsp; \\sqrt{x} &nbsp; x^{2} &nbsp; \\sum_{i=1}^{n} &nbsp; \\int_{a}^{b} &nbsp; \\alpha \\beta \\gamma &nbsp; \\leq \\geq \\neq &nbsp; \\times \\div &nbsp; \\infty</div>'
                 }
             ]
         }],

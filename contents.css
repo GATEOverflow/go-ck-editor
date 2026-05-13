@@ -12,16 +12,18 @@ body
 
 	/* Text color */
 	color: #333;
+
+	/* Default background color */
+	background-color: #fff;
+
 	margin: 20px;
 }
 
-html:not([data-theme="light"]) body {
-	color: #f1f1f1;
+/* Dark mode support for CKEditor (parent page has .dark or [data-theme="dark"]) */
+:root.dark body, [data-theme="dark"] body {
+    background-color: #222 !important;
+    color: #eee !important;
 }
-html.cke_panel_container body {
-	color: inherit;
-}
-
 
 .cke_editable
 {

@@ -38,7 +38,7 @@ CKEDITOR.editorConfig = function( config ) {
 	config.versionCheck = false;
 	//config.extraPlugins ='iframe,notification';
 	config.removePlugins ='sourcedialog,eqneditor';
-	config.extraPlugins ='emoji';
+	config.extraPlugins ='inlinecode';
 	config.scayt_autoStartup = true;
 	config.allowedContent = true;
 	config.extraAllowedContent = 'pre[*]{*}(*);iframe[*];*(*)'; // add other rules here
@@ -70,3 +70,48 @@ CKEDITOR.editorConfig = function( config ) {
 		tab_size : '4'
 	};
 };
+
+// Inject dark mode CSS into CKEditor panel iframes (format/styles dropdowns)
+CKEDITOR.on( 'instanceReady', function() {
+	if ( document.documentElement.getAttribute( 'data-theme' ) !== 'dark' ) return;
+
+	var darkCSS = 'body{background-color:#2a2a2a!important;color:#ccc!important}' +
+		'.cke_panel_listItem a{color:#ccc!important}' +
+		'.cke_panel_grouptitle{background:#333!important;color:#aaa!important}' +
+		'.cke_panel_listItem a:hover,.cke_panel_listItem a:focus,' +
+		'.cke_panel_listItem a:active,.cke_panel_listItem.cke_selected a{' +
+		'background-color:#3a3a3a!important;color:#fff!important}';
+
+	var observer = new MutationObserver( function( mutations ) {
+		mutations.forEach( function( mutation ) {
+			mutation.addedNodes.forEach( function( node ) {
+				if ( node.nodeType !== 1 ) return;
+				var panels = node.classList && node.classList.contains( 'cke_panel' )
+					? [ node ]
+					: Array.from( node.querySelectorAll ? node.querySelectorAll( '.cke_panel' ) : [] );
+				panels.forEach( function( panel ) {
+					var iframe = panel.querySelector( 'iframe' );
+					if ( !iframe ) return;
+					var inject = function() {
+						try {
+							var doc = iframe.contentDocument || iframe.contentWindow.document;
+							if ( doc && doc.head && !doc.head.querySelector( 'style[data-dark-panel]' ) ) {
+								var style = doc.createElement( 'style' );
+								style.setAttribute( 'data-dark-panel', '1' );
+								style.textContent = darkCSS;
+								doc.head.appendChild( style );
+							}
+						} catch ( e ) {}
+					};
+					if ( iframe.contentDocument && iframe.contentDocument.readyState === 'complete' ) {
+						inject();
+					} else {
+						iframe.addEventListener( 'load', inject );
+					}
+				} );
+			} );
+		} );
+	} );
+
+	observer.observe( document.body, { childList: true, subtree: true } );
+} );

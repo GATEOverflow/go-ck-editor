@@ -1,30 +1,50 @@
-/*label styling */
+/* pbckcode dialog - modernized with dark mode support */
+
+/* Label styling */
 .cke_pbckcode_form .cke_dialog_ui_labeled_content {
   display: inline-block;
   vertical-align: middle;
   margin-left: 6px;
 }
 
-/*select styling */
+/* Select styling */
 .cke_pbckcode_form .cke_dialog_ui_input_select select {
-  background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  color: #555;
+  background-color: #fff;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  color: #333;
   display: inline-block;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  font-size: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 13px;
   height: auto;
   margin-bottom: 0;
-  padding: 0;
+  padding: 4px 8px;
   vertical-align: middle;
-  width: 110px;
+  width: 120px;
+  transition: border-color 0.2s, background-color 0.2s, color 0.2s;
 }
 
-/* ace reset needed due to ckeditor style */
+.cke_pbckcode_form .cke_dialog_ui_input_select select:focus {
+  border-color: #4a9eff;
+  outline: none;
+}
+
+/* Checkbox styling */
+.cke_pbckcode_form .cke_dialog_ui_checkbox {
+  margin-top: 18px;
+}
+
+/* ACE editor container */
+.cke_pbckcode_ace {
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ACE font reset */
 .cke_pbckcode_ace.ace_editor * {
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Droid Sans Mono', 'Consolas', monospace;
-  font-size: 12px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+  font-size: 14px;
 }
 
 .cke_pbckcode_ace .ace_invisible {
@@ -32,7 +52,30 @@
   visibility: hidden;
 }
 
-/*good font color on dark theme*/
+/* Dark theme font color fix */
 .cke_pbckcode_ace.ace_dark * {
   color: inherit;
+}
+
+/* Dark mode overrides */
+[data-theme="dark"] .cke_pbckcode_form .cke_dialog_ui_input_select select,
+body.dark-theme .cke_pbckcode_form .cke_dialog_ui_input_select select {
+  background-color: #2d2d2d;
+  border-color: #555;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .cke_pbckcode_form .cke_dialog_ui_input_select select:focus,
+body.dark-theme .cke_pbckcode_form .cke_dialog_ui_input_select select:focus {
+  border-color: #5ba3f5;
+}
+
+[data-theme="dark"] .cke_pbckcode_form label,
+body.dark-theme .cke_pbckcode_form label {
+  color: #ccc;
+}
+
+[data-theme="dark"] .cke_pbckcode_ace,
+body.dark-theme .cke_pbckcode_ace {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }

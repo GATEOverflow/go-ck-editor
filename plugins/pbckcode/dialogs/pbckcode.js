@@ -1,6 +1,241 @@
-﻿CKEDITOR.dialog.add("pbckcodeDialog",function(b){var f,e=new PBSyntaxHighlighter(b.settings.highlighter),c,d,g;return{title:b.lang.pbckcode.title,minWidth:600,minHeight:400,contents:[{id:"editor",label:b.lang.pbckcode.editor,elements:[{type:"hbox",children:[{type:"select",id:"code-select",className:"cke_pbckcode_form",label:b.lang.pbckcode.mode,items:b.settings.modes,"default":b.settings.modes[0][1],setup:function(a){a&&(a=a.getAscendant("pre",!0),this.setValue(a.getAttribute("data-pbcklang")))},
-commit:function(a){a&&(a=a.getAscendant("pre",!0),a.setAttribute("data-pbcklang",this.getValue()))},onChange:function(){d.setMode("ace/mode/"+this.getValue())}},{type:"select",id:"code-tabsize-select",className:"cke_pbckcode_form",label:b.lang.pbckcode.tabSize,items:["1","2","4","8"],"default":b.settings.tab_size,setup:function(a){a&&(a=a.getAscendant("pre",!0),this.setValue(a.getAttribute("data-pbcktabsize")))},commit:function(a){a&&(a=a.getAscendant("pre",!0),a.setAttribute("data-pbcktabsize",this.getValue()))},
-onChange:function(a){a&&(g.convertIndentation(d," ",this.getValue()),d.setTabSize(this.getValue()))}}]},{type:"html",html:"\x3cdiv\x3e\x3c/div\x3e",id:"code-textarea",className:"cke_pbckcode_ace",style:"position: absolute; top: 80px; left: 10px; right: 10px; bottom: 50px;",setup:function(a){a=a.getHtml();a=a.replace(RegExp("\x3cbr/\x3e","g"),"\n").replace(RegExp("\x3cbr\x3e","g"),"\n").replace(RegExp("\x26lt;","g"),"\x3c").replace(RegExp("\x26gt;","g"),"\x3e").replace(RegExp("\x26amp;","g"),"\x26").replace(RegExp("\x26nbsp;",
-"g")," ");c.setValue(a)},commit:function(a){a.setText(c.getValue())}}]}],onLoad:function(){f=this;c=ace.edit(f.getContentElement("editor","code-textarea").getElement().getId());b.aceEditor=c;c.setTheme("ace/theme/"+b.settings.theme);c.setHighlightActiveLine(!0);c.setShowInvisibles(!0);d=c.getSession();d.setMode("ace/mode/"+b.settings.modes[0][1]);d.setTabSize(b.settings.tab_size);d.setUseSoftTabs(!0);g=ace.require("ace/ext/whitespace")},onShow:function(){var a=b.getSelection().getStartElement();a&&
-(a=a.getAscendant("pre",!0));a&&"pre"===a.getName()?("pre"!==e.getTag()&&(a=a.getChild(0)),this.insertMode=!1):(a=new CKEDITOR.dom.element("pre"),"pre"!==e.getTag()&&a.append(new CKEDITOR.dom.element("code")),this.insertMode=!0);this.element=a;c.focus();c.setValue("");this.insertMode||this.setupContent(this.element)},onOk:function(){var a,c;a=c=this.element;this.insertMode?"pre"!==e.getTag()&&(c=this.element.getChild(0)):a=c.getAscendant("pre",!0);this.commitContent(c);e.setCls(a.getAttribute("data-pbcklang")+
-" "+b.settings.cls);c.setAttribute("class",e.getCls());this.insertMode&&b.insertElement(a)}}});CKEDITOR.dialog.on("resize",function(b){b=b.editor.aceEditor;void 0!==b&&b.resize()});
+﻿/**
+ * pbckcode - CKEditor Code Block Dialog (Modernized)
+ * Features: ACE editor, dark mode auto-detection, line numbers toggle
+ */
+CKEDITOR.dialog.add('pbckcodeDialog', function(editor) {
+    var aceEditor, aceSession, whitespace;
+    var highlighter = new PBSyntaxHighlighter(editor.settings.highlighter);
+
+    function isDarkMode() {
+        var html = document.documentElement;
+        return html.getAttribute('data-theme') === 'dark' ||
+               document.body.classList.contains('dark-theme');
+    }
+
+    function getAceTheme() {
+        return isDarkMode() ? 'ace/theme/monokai' : 'ace/theme/textmate';
+    }
+
+    return {
+        title: editor.lang.pbckcode.title,
+        minWidth: 650,
+        minHeight: 450,
+        contents: [{
+            id: 'editor',
+            label: editor.lang.pbckcode.editor,
+            elements: [
+                {
+                    type: 'hbox',
+                    widths: ['40%', '25%', '35%'],
+                    children: [
+                        {
+                            type: 'select',
+                            id: 'code-select',
+                            className: 'cke_pbckcode_form',
+                            label: editor.lang.pbckcode.mode,
+                            items: editor.settings.modes,
+                            'default': editor.settings.modes[0][1],
+                            setup: function(element) {
+                                if (element) {
+                                    var pre = element.getAscendant('pre', true);
+                                    if (pre) this.setValue(pre.getAttribute('data-pbcklang'));
+                                }
+                            },
+                            commit: function(element) {
+                                if (element) {
+                                    var pre = element.getAscendant('pre', true);
+                                    if (pre) pre.setAttribute('data-pbcklang', this.getValue());
+                                }
+                            },
+                            onChange: function() {
+                                if (aceSession) {
+                                    aceSession.setMode('ace/mode/' + this.getValue());
+                                }
+                            }
+                        },
+                        {
+                            type: 'select',
+                            id: 'code-tabsize-select',
+                            className: 'cke_pbckcode_form',
+                            label: editor.lang.pbckcode.tabSize,
+                            items: [['1'], ['2'], ['4'], ['8']],
+                            'default': editor.settings.tab_size,
+                            setup: function(element) {
+                                if (element) {
+                                    var pre = element.getAscendant('pre', true);
+                                    if (pre) this.setValue(pre.getAttribute('data-pbcktabsize'));
+                                }
+                            },
+                            commit: function(element) {
+                                if (element) {
+                                    var pre = element.getAscendant('pre', true);
+                                    if (pre) pre.setAttribute('data-pbcktabsize', this.getValue());
+                                }
+                            },
+                            onChange: function() {
+                                if (aceSession && whitespace) {
+                                    whitespace.convertIndentation(aceSession, ' ', this.getValue());
+                                    aceSession.setTabSize(this.getValue());
+                                }
+                            }
+                        },
+                        {
+                            type: 'checkbox',
+                            id: 'code-linenums',
+                            className: 'cke_pbckcode_form',
+                            label: 'Line numbers',
+                            'default': true,
+                            setup: function(element) {
+                                if (element) {
+                                    var pre = element.getAscendant('pre', true);
+                                    if (pre) {
+                                        var val = pre.getAttribute('data-linenums');
+                                        var cls = pre.getAttribute('class') || '';
+                                        if (val !== null) {
+                                            this.setValue(val !== 'false');
+                                        } else {
+                                            this.setValue(cls.indexOf('no-linenums') === -1);
+                                        }
+                                    }
+                                }
+                            },
+                            commit: function(element) {
+                                if (element) {
+                                    var pre = element.getAscendant('pre', true);
+                                    if (pre) pre.setAttribute('data-linenums', this.getValue() ? 'true' : 'false');
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    type: 'html',
+                    html: '<div></div>',
+                    id: 'code-textarea',
+                    className: 'cke_pbckcode_ace',
+                    style: 'position: absolute; top: 100px; left: 10px; right: 10px; bottom: 10px; border-radius: 6px; overflow: hidden;',
+                    setup: function(element) {
+                        var html = element.getHtml();
+                        html = html
+                            .replace(/<br\/>/g, '\n')
+                            .replace(/<br>/g, '\n')
+                            .replace(/&lt;/g, '<')
+                            .replace(/&gt;/g, '>')
+                            .replace(/&amp;/g, '&')
+                            .replace(/&nbsp;/g, ' ');
+                        aceEditor.setValue(html, -1);
+                    },
+                    commit: function(element) {
+                        element.setText(aceEditor.getValue());
+                    }
+                }
+            ]
+        }],
+
+        onLoad: function() {
+            var dialog = this;
+            var aceContainer = dialog.getContentElement('editor', 'code-textarea').getElement().getId();
+
+            aceEditor = ace.edit(aceContainer);
+            editor.aceEditor = aceEditor;
+
+            aceEditor.setTheme(getAceTheme());
+            aceEditor.setHighlightActiveLine(true);
+            aceEditor.setShowInvisibles(false);
+            aceEditor.setFontSize(14);
+            aceEditor.setOptions({
+                showPrintMargin: false,
+                wrap: true
+            });
+
+            aceSession = aceEditor.getSession();
+            aceSession.setMode('ace/mode/' + editor.settings.modes[0][1]);
+            aceSession.setTabSize(editor.settings.tab_size);
+            aceSession.setUseSoftTabs(true);
+
+            whitespace = ace.require('ace/ext/whitespace');
+
+            // Watch for dark mode changes
+            var observer = new MutationObserver(function() {
+                aceEditor.setTheme(getAceTheme());
+            });
+            observer.observe(document.documentElement, {
+                attributes: true,
+                attributeFilter: ['data-theme']
+            });
+            observer.observe(document.body, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        },
+
+        onShow: function() {
+            var sel = editor.getSelection().getStartElement();
+            var pre = sel ? sel.getAscendant('pre', true) : null;
+            var element;
+
+            if (pre && pre.getName() === 'pre') {
+                element = pre;
+                if (highlighter.getTag() !== 'pre') {
+                    element = pre.getChild(0);
+                }
+                this.insertMode = false;
+            } else {
+                element = new CKEDITOR.dom.element('pre');
+                if (highlighter.getTag() !== 'pre') {
+                    element.append(new CKEDITOR.dom.element('code'));
+                }
+                this.insertMode = true;
+            }
+
+            this.element = element;
+
+            // Update theme on each show
+            aceEditor.setTheme(getAceTheme());
+            aceEditor.focus();
+            aceEditor.setValue('');
+
+            if (!this.insertMode) {
+                this.setupContent(this.element);
+            }
+        },
+
+        onOk: function() {
+            var pre, codeEl;
+            pre = codeEl = this.element;
+
+            if (this.insertMode) {
+                if (highlighter.getTag() !== 'pre') {
+                    codeEl = this.element.getChild(0);
+                }
+            } else {
+                pre = codeEl.getAscendant('pre', true);
+            }
+
+            this.commitContent(codeEl);
+
+            // Build class based on highlighter and line numbers
+            var lang = pre.getAttribute('data-pbcklang');
+            var lineNums = pre.getAttribute('data-linenums') !== 'false';
+
+            if (editor.settings.highlighter === 'PRETTIFY') {
+                var cls = 'prettyprint linenums' + (lineNums ? '' : ' no-linenums') + ' lang-' + lang;
+                if (editor.settings.cls) cls += ' ' + editor.settings.cls;
+                codeEl.setAttribute('class', cls);
+            } else {
+                highlighter.setCls(lang + ' ' + editor.settings.cls);
+                codeEl.setAttribute('class', highlighter.getCls());
+            }
+
+            if (this.insertMode) {
+                editor.insertElement(pre);
+            }
+        }
+    };
+});
+
+// Handle dialog resize for ACE editor
+CKEDITOR.dialog.on('resize', function(evt) {
+    var ace = evt.editor.aceEditor;
+    if (ace) ace.resize();
+});
