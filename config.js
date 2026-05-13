@@ -37,7 +37,7 @@ CKEDITOR.editorConfig = function( config ) {
 
 	config.versionCheck = false;
 	//config.extraPlugins ='iframe,notification';
-	config.removePlugins ='sourcedialog,eqneditor';
+	config.removePlugins ='sourcedialog,eqneditor,image';
 	config.extraPlugins ='inlinecode';
 	config.scayt_autoStartup = true;
 	config.allowedContent = true;
