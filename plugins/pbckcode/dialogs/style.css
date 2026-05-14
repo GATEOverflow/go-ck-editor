@@ -47,6 +47,14 @@
   font-size: 14px;
 }
 
+/* Fix leading whitespace: ACE uses white-space:nowrap on .ace_line which causes
+   text-node leading spaces to collapse to zero-width. Override to pre (no-wrap +
+   whitespace preserved) so indentation renders correctly. */
+.cke_pbckcode_ace .ace_line,
+.cke_pbckcode_ace .ace_line_group {
+  white-space: pre !important;
+}
+
 .cke_pbckcode_ace .ace_invisible {
   opacity: 0;
   visibility: hidden;

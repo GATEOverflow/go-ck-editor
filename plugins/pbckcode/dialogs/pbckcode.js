@@ -115,6 +115,16 @@ CKEDITOR.dialog.add('pbckcodeDialog', function(editor) {
                     className: 'cke_pbckcode_ace',
                     style: 'position: absolute; top: 100px; left: 10px; right: 10px; bottom: 10px; border-radius: 6px; overflow: hidden;',
                     setup: function(element) {
+                        // Prefer data-rawcode (set on save) to avoid browser
+                        // contenteditable whitespace normalization stripping
+                        // leading spaces/tabs from some lines.
+                        var pre = element.getAscendant('pre', true);
+                        var raw = pre ? pre.getAttribute('data-rawcode') : null;
+                        if (raw !== null && raw !== '') {
+                            aceEditor.setValue(raw, -1);
+                            return;
+                        }
+                        // Fallback for older content without data-rawcode
                         var html = element.getHtml();
                         html = html
                             .replace(/<br\/>/g, '\n')
@@ -122,11 +132,16 @@ CKEDITOR.dialog.add('pbckcodeDialog', function(editor) {
                             .replace(/&lt;/g, '<')
                             .replace(/&gt;/g, '>')
                             .replace(/&amp;/g, '&')
-                            .replace(/&nbsp;/g, ' ');
+                            .replace(/&nbsp;/g, ' ')
+                            .replace(/&#9;/g, '\t');
                         aceEditor.setValue(html, -1);
                     },
                     commit: function(element) {
-                        element.setText(aceEditor.getValue());
+                        var code = aceEditor.getValue();
+                        element.setText(code);
+                        // Store raw code to survive contenteditable whitespace normalization
+                        var pre = element.getAscendant('pre', true);
+                        if (pre) pre.setAttribute('data-rawcode', code);
                     }
                 }
             ]
@@ -154,6 +169,18 @@ CKEDITOR.dialog.add('pbckcodeDialog', function(editor) {
             aceSession.setUseSoftTabs(true);
 
             whitespace = ace.require('ace/ext/whitespace');
+
+            // After ACE handles a keystroke, stop it from bubbling up to
+            // CKEditor's dialog listener (which would cycle focus on Tab,
+            // treat Space as a button press, etc.).
+            // Bubble phase (false) is correct: ACE's target-phase handler
+            // runs first, then our listener fires on the container and stops
+            // the event before it reaches the dialog element.
+            var _aceEl = aceEditor.container;
+            function _stopBubble(e) { e.stopPropagation(); }
+            _aceEl.addEventListener('keydown',  _stopBubble, false);
+            _aceEl.addEventListener('keypress', _stopBubble, false);
+            _aceEl.addEventListener('keyup',    _stopBubble, false);
 
             // Watch for dark mode changes
             var observer = new MutationObserver(function() {
