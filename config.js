@@ -86,7 +86,11 @@ CKEDITOR.on( 'instanceReady', function() {
 		mutations.forEach( function( mutation ) {
 			mutation.addedNodes.forEach( function( node ) {
 				if ( node.nodeType !== 1 ) return;
-				var panels = node.classList && node.classList.contains( 'cke_panel' )
+				// Fast-exit: only look at nodes that are (or contain) CKEditor panels
+				var hasCkeClass = node.className && typeof node.className === 'string' && node.className.indexOf('cke_') !== -1;
+				var containsPanel = hasCkeClass || ( node.querySelector && node.querySelector('.cke_panel') );
+				if ( !containsPanel ) return;
+				var panels = hasCkeClass && node.classList.contains( 'cke_panel' )
 					? [ node ]
 					: Array.from( node.querySelectorAll ? node.querySelectorAll( '.cke_panel' ) : [] );
 				panels.forEach( function( panel ) {
